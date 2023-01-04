@@ -1,0 +1,7 @@
+pyqtgraph
+PyQt6
+pyopengl
+matplotlib
+numpy
+fuzzy-c-means
+h5py
