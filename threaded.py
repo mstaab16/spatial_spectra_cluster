@@ -10,6 +10,8 @@ import sys
 
 import psutil
 
+from test import chunky_loader
+
 # Get the total available system RAM
 total_ram = psutil.virtual_memory().total
 
@@ -79,55 +81,60 @@ class _SpectrumLoaderObject(QObject):
             k_bin_factor: int,
             e_bin_factor: int,
             ):
+        spectra = chunky_loader(filename, k_bin_factor, context = self)
+        self.result.emit(1)
 
-        #def load_edc(filename,section):
-        with h5py.File(filename, "r") as f:
-
-            print("Keys: %s" % f.keys())
-            data = f['Data']['Count']
-            print(data.nbytes)
-
-            edc_array=[]
-            xz_array=[]
-            index_array=[]
-            count_i=0
-            count_j=0
-
-            # d0,d1=get_arrays_X_Z(filename)
-            data0 = f['Data']['Axes2']
-            data1 = f['Data']['Axes3']
-            d0_delta=data0.attrs['Delta']
-            d0_count=data0.attrs['Count']
-            d0_start=data0.attrs['Offset']
-
-            d0=np.linspace(d0_start,d0_start+(d0_count-1)*d0_delta,num=d0_count)
-
-            d1_delta=data1.attrs['Delta']
-            d1_count=data1.attrs['Count']
-            d1_start=data1.attrs['Offset']
-
-            d1=np.linspace(d1_start,d1_start+(d1_count-1)*d1_delta,num=d1_count)
-            nnn = 0
-            for i in range(d0_count):
-                for j in range(d1_count):
-                    temp_index=(i,j)
-                    index_array.append(temp_index)
-                    temp_xz=(d0[i],d1[j])
-                    xz_array.append(temp_xz)
-                    temp_edc=data[:,:,i,j].sum(1)
-                    # temp_edc=rebin(data[:,:,count_i,count_j],2).sum(1)
-                    #temp_edc=data[:,section[2]:section[3],count_i,count_j].sum(1)
-                    #temp_edc=data[section[0]:section[1],:,count_i,count_j].sum(0)
-                    edc_array.append(temp_edc)
-                    self.progress.emit(int((nnn)/(d0_count*d1_count))*100)
-                    print(nnn)
-                    nnn += 1
-
-
-
-            spectra = [kmf.Spectrum(position,edc,index) for position,edc,index in zip(xz_array,edc_array,index_array)]
-            spatial_spectra = SpatialSpectrum(filename, binned_dcs=spectra)
-            self.result.emit(1)
+#        #def load_edc(filename,section):
+#        with h5py.File(filename, "r") as f:
+#
+#            print("Keys: %s" % f.keys())
+#            data = f['Data']['Count']
+#            print(data.nbytes)
+#
+#            edc_array=[]
+#            xz_array=[]
+#            index_array=[]
+#            count_i=0
+#            count_j=0
+#
+#              # d0,d1=get_arrays_X_Z(filename)
+#            data0 = f['Data']['Axes2']
+#            data1 = f['Data']['Axes3']
+#            d0_delta=data0.attrs['Delta']
+#            d0_count=data0.attrs['Count']
+#            d0_start=data0.attrs['Offset']
+#
+#            d0=np.linspace(d0_start,d0_start+(d0_count-1)*d0_delta,num=d0_count)
+#
+#            d1_delta=data1.attrs['Delta']
+#            d1_count=data1.attrs['Count']
+#            d1_start=data1.attrs['Offset']
+#
+#            d1=np.linspace(d1_start,d1_start+(d1_count-1)*d1_delta,num=d1_count)
+#            nnn = 0
+#            for i in range(d0_count):
+#                for j in range(d1_count):
+#                    temp_index=(i,j)
+#                    index_array.append(temp_index)
+#                    temp_xz=(d0[i],d1[j])
+#                    xz_array.append(temp_xz)
+#                    temp_edc=data[:,:,i,j].sum(1)
+#                    # temp_edc=rebin(data[:,:,count_i,count_j],2).sum(1)
+#                    #temp_edc=data[:,section[2]:section[3],count_i,count_j].sum(1)
+#                    #temp_edc=data[section[0]:section[1],:,count_i,count_j].sum(0)
+#                    edc_array.append(temp_edc)
+#                    emitting = ((nnn)/(d1_count*d0_count))*100
+#                    print(f"d0_count: {d0_count}, d1_count: {d1_count}, emitting: {emitting}")
+#                    print(f"num_xz: {d1_count*d0_count}, nnn: {nnn}, emitting: {emitting}")
+#                    self.progress.emit(int(emitting))
+#                    print(nnn)
+#                    nnn += 1
+#
+#
+#
+#            spectra = [kmf.Spectrum(position,edc,index) for position,edc,index in zip(xz_array,edc_array,index_array)]
+#            spatial_spectra = SpatialSpectrum(filename, binned_dcs=spectra)
+#            self.result.emit(1)
 
 
 class SpectrumLoaderWidget(QWidget):
@@ -165,7 +172,7 @@ class SpectrumLoaderWidget(QWidget):
         except ValueError:
             return
         # self.requestPrime.emit(n)
-        self.requestPrime.emit("data/Copy of S2_zap_0002.h5", 1, 1)
+        self.requestPrime.emit("data/Copy of S3_zap_0005.h5", 2, 2)
         self._resultLbl.setText("Result: ")
         self._busy.setRange(0,100)
         self._iterationLE.setEnabled(False)

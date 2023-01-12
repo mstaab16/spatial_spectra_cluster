@@ -55,15 +55,27 @@ def split(spectra):
 
 
 def get_ave_spec(spectra,data):
-    data0=np.zeros(shape=(1064,980))
-    count=0
-    for spec in spectra:       
-        data0+=np.array(data[::-1,:,spec.index[0],spec.index[1]])
-        count+=1
-    data0=data0/count
-    data0=np.transpose(data0)
-    data0=np.flip(data0,axis=1)
-    return data0
+#    data0=np.zeros(shape=data.shape[2:])
+#    print(data0.shape)
+#    count=0
+#    for spec in spectra:       
+#        print(f"{(spec.index[0],spec.index[1])}")
+#        data0+=data[spec.index[0],spec.index[1],::-1,:]
+#        count+=1
+#    data0=data0/count
+#    data0=np.transpose(data0)
+#    data0=np.flip(data0,axis=1)
+
+    # sum all elements of data whose index appears in one of the spectra
+
+    avg_spectrum = np.zeros(data.shape[2:])
+    for spec in spectra:
+        avg_spectrum += data[spec.index[0], spec.index[1], :, :]
+    avg_spectrum /= len(spectra)
+    avg_spectrum=np.transpose(avg_spectrum)
+#    avg_spectrum=np.flip(avg_spectrum,axis=1)
+
+    return avg_spectrum
 
 
 

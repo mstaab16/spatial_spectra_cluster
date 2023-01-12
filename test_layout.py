@@ -7,6 +7,8 @@ from h5file import *
 import kmean_functions as kmf
 from pyqtgraph.Qt import QtWidgets
 
+from test import chunky_loader
+
 global mode
 mode='edc'
 global section
@@ -154,13 +156,16 @@ def update_edc_mdc():
     global E_range,k_range
     global section
     fileName1 = pg.widgets.FileDialog.FileDialog.getOpenFileName(parent = win)[0]
-    x_range,z_range=get_arrays_X_Z(fileName1)
+    # x_range,z_range=get_arrays_X_Z(fileName1)
     E_range,k_range=get_arrays_E_K(fileName1)
     section=[200,700,350,600]
     if mode=='edc':
-        spec,data=load_edc(fileName1,section)
-    else:
-        spec,data=load_mdc(fileName1,section)
+        # spec,data=load_edc(fileName1,section)
+        spec,data=chunky_loader(fileName1,2)
+        x_range = {s.position[0] for s in spec}
+        z_range = {s.position[1] for s in spec}
+    # else:
+    #     spec,data=load_mdc(fileName1,section)
     ts1,ts2=kmf.split(spec)
 
     d=np.zeros((data.shape[2],data.shape[3]))
@@ -169,11 +174,19 @@ def update_edc_mdc():
     #         d[s.index[0]][s.index[1]]=10
     for s in spec:
         d[s.index[0]][s.index[1]] = (s.k[0] + 0.25)*(1/1.25)
+    print(d)
 
 
     
     img1.setImage(d)
-    img1.setRect(x_range[0],z_range[0],x_range[-1]-x_range[0], z_range[-1]-z_range[0])
+    print(f"{(min(x_range), min(z_range), max(x_range), max(z_range))}")
+    print(f"{(min(x_range), min(z_range), max(x_range)-min(x_range), max(z_range)-min(z_range))}")
+    print((len(x_range),len(z_range)))
+    print(f"pixel size before rect: {img1.pixelSize()}")
+    img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
+    img1.setPxMode(False)
+    print(f"pixel size before rect: {img1.pixelSize()}")
+
     bool_iso=False
     draw_iso()
 
@@ -194,8 +207,8 @@ def update_edc_mdc():
     lr1.setRegion((k_range[0],k_range[-1]))
     lr2.setRegion((k_range[0],k_range[-1]))
 
-    roi_show.setPos([x_range[0],z_range[0]])
-    roi_show.setSize([x_range[-1]-x_range[0],z_range[-1]-z_range[0]])
+    roi_show.setPos(min(x_range), min(z_range))
+    roi_show.setSize((max(x_range)-min(x_range), max(z_range)-min(z_range)))
 
     roi_show.setZValue(10)
     #return ts1,ts2;
@@ -238,7 +251,8 @@ def split_green():
 
 
     img1.setImage(d)
-    img1.setRect(x_range[0],z_range[0],x_range[-1]-x_range[0], z_range[-1]-z_range[0])
+    #img1.setRect(x_range[0],z_range[0],x_range[-1]-x_range[0], z_range[-1]-z_range[0])
+    img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
 
 
     

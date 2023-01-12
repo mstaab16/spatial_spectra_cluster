@@ -138,14 +138,16 @@ def get_arrays_E_K(filename):
         d0_delta=data0.attrs['Delta']
         d0_start=d0_center-532*d0_delta
         d0_end=d0_center+532*d0_delta
-        d0=np.linspace(d0_start,d0_end,num=1064)
+        #TODO: divide by the bin_factor here
+        d0=np.linspace(d0_start,d0_end,num=data0.attrs['Count']//2)
 
         d1_center=data1.attrs['Center']
     
         d1_delta=data1.attrs['Delta']
         d1_start=d1_center-490*d1_delta
         d1_end=d1_center+490*d1_delta
-        d1=np.linspace(d1_start,d1_end,num=980)
+        #TODO: divide by the bin_factor here
+        d1=np.linspace(d1_start,d1_end,num=data1.attrs['Count']//2)
     return d0,d1
 
 def get_arrays_X_Z(filename):
