@@ -176,15 +176,20 @@ def update_edc_mdc():
         d[s.index[0]][s.index[1]] = (s.k[0] + 0.25)*(1/1.25)
     print(d)
 
+    roi_show.setPos(min(x_range), min(z_range))
+    roi_show.setSize((max(x_range)-min(x_range), max(z_range)-min(z_range)))
 
-    
-    img1.setImage(d, [min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range))])
-    print(f"{(min(x_range), min(z_range), max(x_range), max(z_range))}")
-    print(f"{(min(x_range), min(z_range), max(x_range)-min(x_range), max(z_range)-min(z_range))}")
-    print((len(x_range),len(z_range)))
-    print(f"pixel size before rect: {img1.pixelSize()}")
-    img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
-    print(f"pixel size before rect: {img1.pixelSize()}")
+    roi_show.setZValue(10)
+
+    img1.setImage(d)
+    # print(f"{(min(x_range), min(z_range), max(x_range), max(z_range))}")
+    # print(f"{(min(x_range), min(z_range), max(x_range)-min(x_range), max(z_range)-min(z_range))}")
+    # print((len(x_range),len(z_range)))
+    # print(f"pixel size before rect: {img1.pixelSize()}")
+    # print(f"{img1.width()=}, {img1.height()=}")
+    img1.setRect(min(x_range), min(z_range), img1.width()*(max(x_range)-min(x_range))/len(x_range), img1.height()*(max(z_range)-min(z_range))/len(z_range))
+    # print(f"{img1.boundingRect()=}")
+    # print(f"pixel size before rect: {img1.pixelSize()}")
 
     bool_iso=False
     draw_iso()
@@ -206,10 +211,7 @@ def update_edc_mdc():
     lr1.setRegion((k_range[0],k_range[-1]))
     lr2.setRegion((k_range[0],k_range[-1]))
 
-    roi_show.setPos(min(x_range), min(z_range))
-    roi_show.setSize((max(x_range)-min(x_range), max(z_range)-min(z_range)))
-
-    roi_show.setZValue(10)
+    pw3.setRange(xRange=(min(x_range), max(x_range)), yRange=(min(z_range), max(z_range)))
     #return ts1,ts2;
 
 
@@ -251,7 +253,8 @@ def split_green():
 
     img1.setImage(d)
     #img1.setRect(x_range[0],z_range[0],x_range[-1]-x_range[0], z_range[-1]-z_range[0])
-    img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
+    # img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
+    img1.setRect(min(x_range), min(z_range), img1.width()*(max(x_range)-min(x_range))/len(x_range), img1.height()*(max(z_range)-min(z_range))/len(z_range))
 
 
     
@@ -264,6 +267,8 @@ def split_green():
     data2=kmf.get_ave_spec(ts2,data)
     img_red.setImage(data2,clear=True)
     img_red.setRect(k_range[0],E_range[0],k_range[-1]-k_range[0],E_range[-1]-E_range[0])
+
+    pw3.setRange(xRange=(min(x_range), max(x_range)), yRange=(min(z_range), max(z_range)))
 
 
 def split_red():
@@ -291,7 +296,9 @@ def split_red():
 
 
     img1.setImage(d)
-    img1.setRect(x_range[0],z_range[0],x_range[-1]-x_range[0], z_range[-1]-z_range[0])
+    # img1.setRect(x_range[0],z_range[0],x_range[-1]-x_range[0], z_range[-1]-z_range[0])
+    # img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
+    img1.setRect(min(x_range), min(z_range), img1.width()*(max(x_range)-min(x_range))/len(x_range), img1.height()*(max(z_range)-min(z_range))/len(z_range))
     
 
 
@@ -304,6 +311,8 @@ def split_red():
     data2=kmf.get_ave_spec(ts2,data)
     img_red.setImage(data2)
     img_red.setRect(k_range[0],E_range[0],k_range[-1]-k_range[0],E_range[-1]-E_range[0])
+    
+    pw3.setRange(xRange=(min(x_range), max(x_range)), yRange=(min(z_range), max(z_range)))
 
 def change_iso():
     global bool_iso
