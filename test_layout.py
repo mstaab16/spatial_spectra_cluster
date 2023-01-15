@@ -178,13 +178,12 @@ def update_edc_mdc():
 
 
     
-    img1.setImage(d)
+    img1.setImage(d, [min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range))])
     print(f"{(min(x_range), min(z_range), max(x_range), max(z_range))}")
     print(f"{(min(x_range), min(z_range), max(x_range)-min(x_range), max(z_range)-min(z_range))}")
     print((len(x_range),len(z_range)))
     print(f"pixel size before rect: {img1.pixelSize()}")
     img1.setRect(min(x_range), min(z_range), (max(x_range)-min(x_range)), (max(z_range)-min(z_range)))
-    img1.setPxMode(False)
     print(f"pixel size before rect: {img1.pixelSize()}")
 
     bool_iso=False
