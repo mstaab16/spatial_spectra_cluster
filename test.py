@@ -26,11 +26,12 @@ def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[list[
     available_ram = total_ram - used_ram
 
 # Print the available system RAM print(f'Available system RAM: {available_ram:.2f} bytes')
-# print(f'Available system RAM: {available_ram/1073741824:.2f} GB')
+    print(f'Available system RAM: {available_ram/1073741824:.2f} GB')
 
     start = perf_counter()
 # Open the .h5 file
-    with h5py.File(filename, 'r') as f:
+    with h5py.File(filename, 'r', rdcc_nbytes=available_ram, rdcc_nslots=1e7) as f:
+    # with h5py.File(filename, 'r', rdcc_nbytes=1024**2*4000, rdcc_nslots=1e7) as f:
         # Get the dataset
         dset: np.ndarray = f['/Data/Count']
 
@@ -65,10 +66,12 @@ def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[list[
             i_chunk += 1
             x_vals, z_vals = [], []
             for _ in range(max_spectra_in_ram):
+                emitting = i/(n_x * n_z)*100
+                emitting = min(emitting, 90)
                 if context is not None:
-                    emitting = i/(n_x * n_z)*100
-                    emitting = min(emitting, 90)
                     context.progress.emit(int(emitting))
+                else:
+                    print(f"{emitting}%")
                 i += 1
                 if i >= n_x * n_z:
                     break
@@ -78,35 +81,32 @@ def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[list[
                 z_vals.append(z)
                 xz_array.append((x, z))
 
-            print(f"shape of dset{dset.shape}")
             data = dset[:, :, min(x_vals):max(x_vals)+1, min(z_vals):max(z_vals)+1].transpose((2, 3, 0, 1))
-            # print(data.shape)
-            # plt.imshow(data[:,:,10,10])
-            # plt.show()
-            print(f"shape of data{data.shape}")
             binned_data[min(x_vals):max(x_vals)+1, min(z_vals):max(z_vals)+1, :, :] = rebin(data, bin_factor)
-            # print(binned_data.shape)
-            # plt.imshow(binned_data[:,:,10,10])
-            # plt.show()
             edc_array[min(x_vals):max(x_vals)+1, min(z_vals):max(z_vals)+1, :] = binned_data[min(x_vals):max(x_vals)+1, min(z_vals):max(z_vals)+1, :].sum(axis=3)
-            print(f"shape of binned_data: {binned_data.shape}")
+            # data = np.zeros((n_ene, n_ang, max(x_vals)-min(x_vals)+1, max(z_vals)-min(z_vals)+1))
+            # data[:, :, x_vals, z_vals] = np.copy(dset[:, :, x_vals, z_vals])
+            # data = data.transpose((2, 3, 0, 1))
+            # binned_data[x_vals, z_vals, :, :] = rebin(data, bin_factor)
+            # edc_array[x_vals, z_vals, :] = binned_data[x_vals, z_vals, :].sum(axis=3)
 
             xz_indecies = np.array(xz_array)
     
-            x_offset = f['Data']['Axes2'].attrs['Offset']
-            x_delta = f['Data']['Axes2'].attrs['Delta']
-            x_count = f['Data']['Axes2'].attrs['Count']
-            z_offset = f['Data']['Axes3'].attrs['Offset']
-            z_delta = f['Data']['Axes3'].attrs['Delta']
-            z_count = f['Data']['Axes3'].attrs['Count']
 
     
+        x_offset = f['Data']['Axes2'].attrs['Offset']
+        x_delta = f['Data']['Axes2'].attrs['Delta']
+        x_count = f['Data']['Axes2'].attrs['Count']
+        z_offset = f['Data']['Axes3'].attrs['Offset']
+        z_delta = f['Data']['Axes3'].attrs['Delta']
+        z_count = f['Data']['Axes3'].attrs['Count']
+
     xz_values = np.array([(x_offset + x*x_delta, z_offset + z*z_delta) for x, z in xz_indecies])
 
     print(f'Loading time: {(perf_counter() - start)/60:.2f} minutes')
 
 
-    spectra = [kmf.Spectrum(position,edc_array[index[0],index[1],:],index) for position,index in zip(xz_values,xz_indecies)]
+    spectra = [kmf.Spectrum(position, edc_array[index[0],index[1],:], index) for position,index in zip(xz_values,xz_indecies)]
     # return SpatialSpectrum(edc_array, binned_data)
     if context is not None:
         context.progress.emit(100)
