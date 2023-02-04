@@ -159,7 +159,6 @@ class GUI:
         return
 
     def setLevelMode(self):
-        
         self.mode = 'edc' if edcRadio.isChecked() else 'mdc'
 
     def update_all_figure(self):

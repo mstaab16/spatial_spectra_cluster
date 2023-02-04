@@ -51,14 +51,14 @@ class State(QObject):
 
 
         for cluster in self.clustered_spectra.walk_clusters(0):
-            # running_avg_spectrum = np.zeros((self.data_array.shape[2], self.data_array.shape[3]))
+            running_avg_spectrum = np.zeros((self.data_array.shape[2], self.data_array.shape[3]))
             for spectrum in self.clustered_spectra._clusters[cluster].spectra:
                 color_tuple = hex_to_rgb(self.clustered_spectra._clusters[cluster].color)
                 index = self.clustered_spectra.spectra[spectrum].data
                 self.cluster_colors[index[0], index[1], :] = color_tuple
-                # running_avg_spectrum += self.data_array[index[0], index[1], :, :]
-            # running_avg_spectrum /= len(self.clustered_spectra._clusters[cluster].spectra)
-            # self.clustered_spectra._clusters[cluster].centroid = running_avg_spectrum
+                running_avg_spectrum += self.data_array[index[0], index[1], :, :]
+            running_avg_spectrum /= len(self.clustered_spectra._clusters[cluster].spectra)
+            self.clustered_spectra._clusters[cluster].centroid = running_avg_spectrum
 
 
 
