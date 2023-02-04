@@ -3,9 +3,8 @@ import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtWidgets
-from test import chunky_loader
 
-from state_class import *
+from state_class import State
 
 #from h5file import *
 #import kmean_functions as kmf
@@ -29,7 +28,7 @@ class GUI:
 
 
         self.cw = QtWidgets.QWidget()
-        self.win.setCentralWidget(self.cw )
+        self.win.setCentralWidget(self.cw)
 
         layout = QtWidgets.QGridLayout()
         self.cw .setLayout(layout)
@@ -129,16 +128,16 @@ class GUI:
         self.split_img.setColorMap(cmap)
 
 
-        self.img_green=pg.ImageItem()
-        left_figure.addItem(self.img_green,row=1,col=1)
+        self.img_left=pg.ImageItem()
+        left_figure.addItem(self.img_left,row=1,col=1)
         hist1 = pg.HistogramLUTItem()
-        hist1.setImageItem(self.img_green)
+        hist1.setImageItem(self.img_left)
         left_img_box.addItem(hist1,row=0,col=2)
 
-        self.img_red=pg.ImageItem()
-        right_figure.addItem(self.img_red,row=1,col=1)
+        self.img_right=pg.ImageItem()
+        right_figure.addItem(self.img_right,row=1,col=1)
         hist2 = pg.HistogramLUTItem()
-        hist2.setImageItem(self.img_red)
+        hist2.setImageItem(self.img_right)
         right_img_box.addItem(hist2,row=0,col=2)
 
 
@@ -155,8 +154,7 @@ class GUI:
 
     def update_file(self):
         #todo
-        fileName1 = pg.widgets.FileDialog.FileDialog.getOpenFileName()[0]
-        print(fileName1)
+        self.state.load_data()
         self.update_all_figure()
         return
 
@@ -165,26 +163,37 @@ class GUI:
         self.mode = 'edc' if edcRadio.isChecked() else 'mdc'
 
     def update_all_figure(self):
+        self.split_img.setImage(self.state.cluster_colors)
+        self.change_left_roi()
+        self.change_right_roi()
+        self.set_img_left()
+        self.set_img_right()
         #todo
         return
 
     def set_p1_figure(self):
         # todo
-        self.split_img.setImage(np.array([[[0.5,1,1],[1,1,0],[1,0,1]],[[0.5,1,1],[1,1,0],[1,0,1]]]))
+        # self.split_img.setImage(np.array([[[0.5,1,1],[1,1,0],[1,0,1]],[[0.5,1,1],[1,1,0],[1,0,1]]]))
+        self.split_img.setImage(self.state.cluster_colors)
         return
-    def set_img_green(self):
-        # todo
+
+    def set_img_left(self):
+        self.img_left.setImage(self.state.left_img.transpose())
         return
-    def set_img_red(self):
+
+    def set_img_right(self):
         # todo
+        self.img_right.setImage(self.state.right_img.transpose())
         return
 
     def change_left_roi(self):
         self.state.set_left_coordinate(self.roi_left.pos())
+        self.set_img_left()
         print(self.state.get_left_coordinate())
 
     def change_right_roi(self):
         self.state.set_right_coordinate(self.roi_right.pos())
+        self.set_img_right()
         print(self.state.get_right_coordinate())
 
 

@@ -6,3 +6,4 @@ numpy
 fuzzy-c-means
 h5py
 psutil
+scikit-learn

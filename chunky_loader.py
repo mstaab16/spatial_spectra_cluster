@@ -5,6 +5,21 @@ from time import perf_counter
 from spatial_spectrum import SpatialSpectrum
 import kmean_functions as kmf
 
+
+from dataclasses import dataclass
+import dataclasses
+import numpy.typing as npt
+@dataclass()
+class Spectrum:
+    k_bin_factor: int = 1
+    e_bin_factor: int = 1
+    data: npt.NDArray = np.array([])
+    pos: npt.NDArray = np.array([])
+    metadata: dict = dataclasses.field(default_factory=dict)
+
+    def __post_init__(self):
+        print(f"post init of {self.pos}")
+
 def rebin(arr, bin_factor):
     # reshape the array to group the elements by energy and angle bins
     print(f"in rebin, shape of arr: {arr.shape}")
@@ -15,7 +30,7 @@ def rebin(arr, bin_factor):
 
     return arr
 
-def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[list[kmf.Spectrum], np.ndarray]:
+def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[npt.NDArray, tuple[Spectrum]]:
 # Get the total available system RAM
     total_ram = psutil.virtual_memory().total
 
@@ -90,7 +105,7 @@ def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[list[
             # binned_data[x_vals, z_vals, :, :] = rebin(data, bin_factor)
             # edc_array[x_vals, z_vals, :] = binned_data[x_vals, z_vals, :].sum(axis=3)
 
-            xz_indecies = np.array(xz_array)
+            xz_indicies = np.array(xz_array)
     
 
     
@@ -101,16 +116,18 @@ def chunky_loader(filename: str, bin_factor: int, context = None) -> tuple[list[
         z_delta = f['Data']['Axes3'].attrs['Delta']
         z_count = f['Data']['Axes3'].attrs['Count']
 
-    xz_values = np.array([(x_offset + x*x_delta, z_offset + z*z_delta) for x, z in xz_indecies])
+    xz_values = np.array([(x_offset + x*x_delta, z_offset + z*z_delta) for x, z in xz_indicies])
 
     print(f'Loading time: {(perf_counter() - start)/60:.2f} minutes')
 
 
-    spectra = [kmf.Spectrum(position, edc_array[index[0],index[1],:], index) for position,index in zip(xz_values,xz_indecies)]
+    # spectra = [kmf.Spectrum(position, edc_array[index[0],index[1],:], index) for position,index in zip(xz_values,xz_indecies)]
+    spectra = tuple(Spectrum(2, 2, index, position) for position,index in zip(xz_values,xz_indicies))
     # return SpatialSpectrum(edc_array, binned_data)
     if context is not None:
         context.progress.emit(100)
-    return spectra, binned_data
+    #return spectra, binned_data
+    return binned_data, spectra
 
 
 
