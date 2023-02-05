@@ -184,7 +184,7 @@ class SpectrumLoaderWidget(QWidget):
         self.data = n
 
     @pyqtSlot(int)
-    def displayProgress(self, n):
+    def displayProgress(self, n: int):
         self._busy.setValue(n)
 
     @pyqtSlot(int)

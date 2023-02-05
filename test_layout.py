@@ -31,8 +31,8 @@ layout.setSpacing(0)
 
 #layout.setColumnMinimumWidth(0,WIDTH/2)
 #layout.setColumnMinimumWidth(1,WIDTH/2)
-layout.setRowMinimumHeight(0,HEIGHT*1/3)
-layout.setRowMinimumHeight(1,HEIGHT*1/3)
+layout.setRowMinimumHeight(0,int(HEIGHT*1/3))
+layout.setRowMinimumHeight(1,int(HEIGHT*1/3))
 # pw1 is the left most plot
 pw1 = pg.GraphicsLayoutWidget() 
 layout.addWidget(pw1,0,0,2,2)
@@ -47,15 +47,9 @@ p1_figure.addItem(lr1)
 p1_mdc = pw1.addPlot(row=2,col=1)
 p1_mdc.setMaximumHeight(90)
 
-
-
 p1_edc = pw1.addPlot(row=0,col=0)
 p1_edc.setMaximumHeight(850)
 p1_edc.setMaximumWidth(180)
-
-
-
-
 
 # pw2 is the left most plot
 pw2 = pg.GraphicsLayoutWidget() 
