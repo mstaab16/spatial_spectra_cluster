@@ -24,9 +24,6 @@ class GUI:
         self.win.resize(WIDTH,HEIGHT)
         self.state=State()
 
-
-
-
         self.cw = QtWidgets.QWidget()
         self.win.setCentralWidget(self.cw)
 
@@ -98,6 +95,7 @@ class GUI:
         layout.addWidget(button_iso, 4, 2)
         button_save= QtWidgets.QPushButton('save_spatial')
         layout.addWidget(button_save, 5, 2)
+        button_save.clicked.connect(self.save_spatial)
 
         self.split_img = pg.ImageItem()
         split_display_box.addItem(self.split_img)
@@ -149,8 +147,6 @@ class GUI:
         edcRadio.toggled.connect(self.setLevelMode)
         self.mode = 'edc'
 
-        
-        
 
     def update_file(self):
         #todo
@@ -196,9 +192,13 @@ class GUI:
         self.set_img_right()
         print(self.state.get_right_coordinate())
 
+    def save_spatial(self):
+        left_savestr = f"output/left_{'_'.join(map(int, self.state.get_left_coordinate()))}.txt"
+        right_savestr = f"output/right_{'_'.join(map(int, self.state.get_right_coordinate()))}.txt"
+        np.savetxt('output/spatial.txt',self.state.cluster_labels)
+        np.savetxt(left_savestr, self.state.left_img)
+        np.savetxt(right_savestr, self.state.right_img)
 
-
-    
 
 
 if __name__ == '__main__':

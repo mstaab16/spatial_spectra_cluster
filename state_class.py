@@ -21,12 +21,10 @@ class State(QObject):
         self.right_img = np.array([])  # the image displayed on the right
         self.cluster_colors = np.array([[0,0,0],[0,0,0]])
 
-
     def set_left_coordinate(self, coord):
         self.left_coordinate=np.array(coord,dtype=np.int64)
         self.left_img=self.clustered_spectra \
             .get_cluster_by_spectrum_position_index(self.left_coordinate.tolist()).centroid
-
 
     def get_left_coordinate(self):
         return self.left_coordinate
@@ -35,12 +33,9 @@ class State(QObject):
         self.right_coordinate=np.array(coord,dtype=np.int64)
         self.right_img=self.clustered_spectra \
             .get_cluster_by_spectrum_position_index(self.right_coordinate.tolist()).centroid
-        
 
     def get_right_coordinate(self):
         return self.right_coordinate
-
-
 
     def load_data(self):
         bin_factor = 2
@@ -48,13 +43,14 @@ class State(QObject):
         self.data_array, self.spectra = chunky_loader(file_name, bin_factor)
         self.clustered_spectra = ClusteredSpectra(self.data_array, self.spectra)
         self.cluster_colors = np.zeros((self.data_array.shape[0], self.data_array.shape[1], 3))
-
+        self.cluster_labels = np.zeros((self.data_array.shape[0], self.data_array.shape[1]))
 
         for cluster in self.clustered_spectra.walk_clusters(0):
             # running_avg_spectrum = np.zeros((self.data_array.shape[2], self.data_array.shape[3]))
             for spectrum in self.clustered_spectra._clusters[cluster].spectra:
-                color_tuple = hex_to_rgb(self.clustered_spectra._clusters[cluster].color)
                 index = self.clustered_spectra.spectra[spectrum].data
+                self.cluster_labels[index[0], index[1]] = cluster
+                color_tuple = hex_to_rgb(self.clustered_spectra._clusters[cluster].color)
                 self.cluster_colors[index[0], index[1], :] = color_tuple
                 # running_avg_spectrum += self.data_array[index[0], index[1], :, :]
             # running_avg_spectrum /= len(self.clustered_spectra._clusters[cluster].spectra)
