@@ -193,8 +193,8 @@ class GUI:
         print(self.state.get_right_coordinate())
 
     def save_spatial(self):
-        left_savestr = f"output/left_{'_'.join(map(int, self.state.get_left_coordinate()))}.txt"
-        right_savestr = f"output/right_{'_'.join(map(int, self.state.get_right_coordinate()))}.txt"
+        left_savestr = f"output/left_{'_'.join(map(str, self.state.get_left_coordinate()))}.txt"
+        right_savestr = f"output/right_{'_'.join(map(str, self.state.get_right_coordinate()))}.txt"
         np.savetxt('output/spatial.txt',self.state.cluster_labels)
         np.savetxt(left_savestr, self.state.left_img)
         np.savetxt(right_savestr, self.state.right_img)
