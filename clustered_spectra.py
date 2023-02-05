@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 import matplotlib.colors as mcolors
 
@@ -76,17 +77,26 @@ class ClusteredSpectra:
 
     def _cluster_k(self, k:int):
         """Cluster the spectra using Kmeans with k=2"""
+        pca_components = 500
         data = self.data
         classifier = KMeans(n_clusters=k)
-        classifier.fit(data.reshape(data.shape[0]*data.shape[1], data.shape[2]*data.shape[3]))
+        flattened_data = data.reshape(data.shape[0]*data.shape[1], data.shape[2]*data.shape[3])
+        print(f"{flattened_data.shape=}")
+        pca = PCA(n_components=pca_components)
+        pca_data = pca.fit_transform(flattened_data)
+        print(f"{pca_data.shape=}")
+
+        classifier.fit(pca_data)
         labels = classifier.labels_.reshape(data.shape[0], data.shape[1])
-        centroids = classifier.cluster_centers_.reshape(k, data.shape[2], data.shape[3])
+        cluster_centers = classifier.cluster_centers_
+        print(f"{cluster_centers.shape=}")
+        centroids = np.array([pca.inverse_transform(center) for center in cluster_centers]).reshape(k, data.shape[2], data.shape[3])
+        print(f"{centroids.shape=}")
+        # 
 
         for cluster_i in np.unique(np.ravel(labels)):
             spectra_i = np.argwhere(labels == cluster_i).tolist()
-            print(f"{spectra_i=}")
             spectra = [i for i, spectrum in enumerate(self.spectra) if spectrum.data.tolist() in spectra_i]
-            print(f"{spectra=}")
             self.make_subcluster(0, spectra, centroids[cluster_i])
 
     def get_cluster_by_spectrum_position_index(self, spectrum_position_index: tuple[int,int]) -> int:
